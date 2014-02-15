@@ -1,5 +1,5 @@
 iwatch: iwatch.c
-	gcc iwatch.c -o iwatch
+	gcc -std=c99 -Werror -Wall -Wextra iwatch.c -o iwatch
 
 clean:
 	rm -f iwatch
