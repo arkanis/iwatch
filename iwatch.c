@@ -5,6 +5,7 @@
 #include <sys/ioctl.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include <sys/wait.h>
 #include <sys/types.h>
@@ -34,28 +35,33 @@ int main(int argc, char **argv){
 	char buffer[4096];
 	struct inotify_event *event = (void*)buffer;
 	while(true){
-		int bytes_read = read(event_queue, event, sizeof(buffer));
+		int bytes_read = 0;
+		do {
+			bytes_read = read(event_queue, event, sizeof(buffer));
+		} while(bytes_read == -1 && errno == EINTR);
 		if (bytes_read == -1){
 			perror("read of event structure failed");
 			break;
 		}
 		
-		void exec_command(){
+		if (event->mask & IN_CREATE){
+			printf("file created in %s, executing: %s\n", target_file, action);
 			pid_t child = fork();
 			if (child == 0) {
-				execl("/bin/sh", "/bin/sh", "-c", action, (char*)NULL);
+				execl("/bin/sh", "/bin/sh", "-c", action, NULL);
 			} else {
 				waitpid(child, NULL, 0);
 			}
 		}
-		
-		if (event->mask & IN_CREATE){
-			printf("file created in %s, executing: %s\n", target_file, action);
-			exec_command();
-		}
+
 		if (event->mask & IN_CLOSE_WRITE){
-			printf("file written to, executing: %s\n", action);
-			exec_command();
+			printf("file %s written to, executing: %s\n", target_file, action);
+			pid_t child = fork();
+			if (child == 0) {
+				execl("/bin/sh", "/bin/sh", "-c", action, NULL);
+			} else {
+				waitpid(child, NULL, 0);
+			}
 		}
 		
 		if (event->mask & IN_DELETE_SELF) {
