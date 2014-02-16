@@ -15,7 +15,7 @@ int main(int argc, char **argv){
 	
 	// Handle command line arguments
 	if (argc < 3){
-		fprintf(stderr, "Execute a command as soon as a watched file changes.\n");
+		fprintf(stderr, "iwatch v0.4 - execute a command as soon as a watched file changes.\n");
 		fprintf(stderr, "Usage: %s file... command\n", argv[0]);
 		return -1;
 	}
