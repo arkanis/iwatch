@@ -15,7 +15,7 @@ int main(int argc, char **argv){
 	
 	// Handle command line arguments
 	if (argc < 3){
-		fprintf(stderr, "iwatch v0.4 - execute a command as soon as a watched file changes.\n");
+		fprintf(stderr, "iwatch v0.5 - execute a command as soon as a watched file changes.\n");
 		fprintf(stderr, "Usage: %s file... command\n", argv[0]);
 		return -1;
 	}
@@ -71,7 +71,7 @@ int main(int argc, char **argv){
 		if (event->mask & IN_CREATE || event->mask & IN_CLOSE_WRITE){
 			pid_t child = fork();
 			if (child == 0) {
-				execl("/bin/sh", "/bin/sh", "-c", command, NULL);
+				execl("/bin/bash", "/bin/bash", "-c", command, NULL);
 			} else {
 				waitpid(child, NULL, 0);
 			}
