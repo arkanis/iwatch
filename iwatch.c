@@ -15,7 +15,7 @@ int main(int argc, char **argv){
 	
 	// Handle command line arguments
 	if (argc < 3){
-		fprintf(stderr, "iwatch v0.5 - execute a command as soon as a watched file changes.\n");
+		fprintf(stderr, "iwatch v0.6 - execute a command as soon as a watched file changes.\n");
 		fprintf(stderr, "Usage: %s file... command\n", argv[0]);
 		return -1;
 	}
@@ -62,10 +62,14 @@ int main(int argc, char **argv){
 		}
 		char* file = (i < file_count) ? files[i] : "unknown file";
 		
-		if (event->mask & IN_CREATE)
+		if (event->mask & IN_IGNORED) {
+			printf("File %s deleted or filesystem unmounted. Exiting.\n", file);
+			break;
+		} else if (event->mask & IN_CREATE) {
 			printf("File created in %s, executing: %s\n", file, command);
-		else if (event->mask & IN_CLOSE_WRITE)
+		} else if (event->mask & IN_CLOSE_WRITE) {
 			printf("File %s written to, executing: %s\n", file, command);
+		}
 		
 		// Execute command
 		if (event->mask & IN_CREATE || event->mask & IN_CLOSE_WRITE){
